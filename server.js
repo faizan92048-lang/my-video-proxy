@@ -3,6 +3,13 @@ const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// CORS setup taaki video player block na ho
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    next();
+});
+
 app.get('/stream', async (req, res) => {
     const videoUrl = req.query.videoUrl;
     if (!videoUrl) return res.status(400).send("Video URL is missing");
@@ -13,13 +20,14 @@ app.get('/stream', async (req, res) => {
             url: videoUrl,
             headers: {
                 'Authorization': `Bearer ${process.env.AUTH_TOKEN}`,
-                'User-Agent': 'Mozilla/5.0'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+                'Referer': 'https://www.physicswallah.live/',
+                'Origin': 'https://www.physicswallah.live/'
             },
             responseType: 'stream',
-            timeout: 60000 // Timeout badha diya taaki video load ho sake
+            timeout: 120000 
         });
 
-        // Headers forward karo taaki browser ko pata chale ki ye video hai
         res.set(response.headers);
         response.data.pipe(res);
     } catch (error) {
