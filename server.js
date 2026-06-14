@@ -13,7 +13,7 @@ app.get('/stream', async (req, res) => {
             url: videoUrl,
             headers: {
                 'Authorization': `Bearer ${process.env.AUTH_TOKEN}`,
-                'Range': req.headers.range, // DASH ke liye Range header zaroori hai
+                'Range': req.headers.range || 'bytes=0-',
                 'User-Agent': 'Mozilla/5.0'
             },
             responseType: 'stream'
@@ -23,8 +23,8 @@ app.get('/stream', async (req, res) => {
         res.set(response.headers);
         response.data.pipe(res);
     } catch (error) {
-        res.status(500).send(error.message);
+        res.status(error.response ? error.response.status : 500).send(error.message);
     }
 });
 
-app.listen(PORT);
+app.listen(PORT, () => console.log(`Server running`));
